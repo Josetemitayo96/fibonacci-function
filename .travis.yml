@@ -1,0 +1,29 @@
+
+sudo: required
+services:
+  - docker
+
+#to build a dockerfile.dev that is not in the same directory as travis file
+before_install:
+  - docker build -t tayo96/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run tayo96/react-test npm test -- -- coverage
+#-- -- coverage to make sure it exist
+
+after_success:
+  - docker build -t tayo96/multi-client ./client
+  - docker build -t tayo96/multi-nginx ./nginx
+  - docker build -t tayo96/multi-server ./server
+  - docker build -t tayo96/multi-worker ./worker
+
+
+  
+
+  #log in to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # push images to docker hub
+  - docker push tayo96/multi-client
+  - docker push tayo96/multi-nginx
+  - docker push tayo96/multi-server
+  - docker push tayo96/multi-worker
