@@ -27,3 +27,19 @@ after_success:
   - docker push tayo96/multi-nginx
   - docker push tayo96/multi-server
   - docker push tayo96/multi-worker
+
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-2
+  app: multi-docker
+  env:  MultiDocker-env
+  #s3bucket is where travis zip up and dump our files
+  bucket_name: elasticbeanstalk-us-east-2-569134486672
+  bucket_path: docker-multi
+
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: 
+    secure: $AWS_SECRET_KEY
