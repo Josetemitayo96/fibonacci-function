@@ -1,45 +1,35 @@
-
 sudo: required
 services:
   - docker
 
-#to build a dockerfile.dev that is not in the same directory as travis file
 before_install:
   - docker build -t tayo96/react-test -f ./client/Dockerfile.dev ./client
 
 script:
   - docker run tayo96/react-test npm test -- --coverage
-#-- -- coverage to make sure it exist
 
 after_success:
   - docker build -t tayo96/multi-client ./client
   - docker build -t tayo96/multi-nginx ./nginx
   - docker build -t tayo96/multi-server ./server
   - docker build -t tayo96/multi-worker ./worker
-
-
-
-
-  #log in to docker CLI
+  # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  # push images to docker hub
+  # Take those images and push them to docker hub
   - docker push tayo96/multi-client
   - docker push tayo96/multi-nginx
   - docker push tayo96/multi-server
   - docker push tayo96/multi-worker
 
-
 deploy:
   provider: elasticbeanstalk
-  region: us-east-2
+  region: us-west-1
   app: multi-docker
-  env:  MultiDocker-env
-  #s3bucket is where travis zip up and dump our files
-  bucket_name: elasticbeanstalk-us-east-2-569134486672
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-west-1-306476627547
   bucket_path: docker-multi
-
   on:
     branch: master
   access_key_id: $AWS_ACCESS_KEY
-  secret_access_key: 
+  secret_access_key:
     secure: $AWS_SECRET_KEY
